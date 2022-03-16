@@ -47,7 +47,7 @@
         <div id="home" style="display: none">
             <div class="page center" style="width: 50%">
                 <h1 id="title"></h1>
-                <button class="whitet black sap crack" onclick="navigator.clipboard.writeText(profile.key.pub)">Copy
+                <button class="whitet black sap crack" onclick="testClick()">Copy
                     Public Address</button>
                 <p class="tintt crack thin">Enter public key of your friends (3 to 5 unique friends)</p>
                 <div class="crack " style="display: flex; flex-direction: column;">
@@ -95,12 +95,13 @@
 
 <script>
 
-    const gun = Gun({ peers: ['https://gun-manhattan.herokuapp.com/gun'] });
+    const gun = Gun(['https://gun-manhattan.herokuapp.com/gun']);
     const profile = {
         username: "",
         key: {},
         secretPubs: []
     }
+    let realKey = {};
     const user = gun.user();
     const swap = (current, next) => {
         $("#" + current).hide()
@@ -124,12 +125,15 @@
 
     const login = async (k) => {
         user.auth(k);
-        localStorage.setItem("userkey", JSON.stringify(key));
         if (user.is) {
-            var username = await user.get("profile").get("name").then()
-            $("#title").html(`Welcome <span class="blackt">${username}</span>`)
+          realKey = JSON.stringify(user.is);
+          var username = await user.get("profile").get("name").then()
+          $("#title").html(`Welcome <span class="blackt">${username}</span>`)
+          localStorage.setItem("userkey", realKey);
+          console.log(username)
             profile.username = username
-            profile.key = key;
+            profile.key = realKey;
+            console.log("profile.key.pub",realKey)
             swap("welcome", "home")
         }
         $("#key").val("")
@@ -142,7 +146,12 @@
             })
         })
     }
-
+    const testClick = () => {
+        console.log("11111",realKey);
+        const pub = JSON.stringify(JSON.parse(realKey).pub).split("\"")[1];
+        console.log("22222",pub);
+        navigator.clipboard.writeText(pub);
+    }
     const addPubs = async () => {
         var pub = $("#pub").val()
         var name = await gun.user(pub).get("profile").get("name").then()
